@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
+const MAX_FILES = 20;
+
 export default function Home() {  
   const [cookies, setCookie, removeCookie] = useCookies(['user'])
   const router = useRouter()
@@ -61,6 +63,10 @@ export default function Home() {
   }
 
   const fileUpload = (clientName: string) => (event: ChangeEvent<HTMLInputElement>) => {
+    if (files.length >= 20) {
+      alert("Only 20 files can be uploaded")
+      return
+    }
     const file = event.target.files?.item(0)
     if (file) {
       switch (file.type) {
@@ -133,7 +139,7 @@ export default function Home() {
           />
         </div>
         <div className="">
-          <label htmlFor="large-input" className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Files</label>
+          <label htmlFor="large-input" className="mb-2 text-lg font-medium text-gray-900 dark:text-white">{`Files (${files.length}/${MAX_FILES})`}</label>
           <div className="relative inline-block float-right">
             <label htmlFor="file" className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 cursor-pointer">
               { uploading ? "Uploading..." : "Upload File" }
