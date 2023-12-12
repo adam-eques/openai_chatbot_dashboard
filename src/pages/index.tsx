@@ -96,7 +96,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>{cookies.user?.name}</title>
+        <title>dashboard</title>
       </Head>
       <main className="flex flex-col px-10 pt-10">
         <div className="mb-7">
