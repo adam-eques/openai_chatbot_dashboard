@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 
-
 export default function Login() {
   const [cookies, setCookie, removeCookie] = useCookies(['user'])
   const router = useRouter()
@@ -23,6 +22,7 @@ export default function Login() {
       alert(error)
     }
   }
+
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden">
       <div className="w-full p-6 bg-white rounded-md shadow-md lg:max-w-xl">
