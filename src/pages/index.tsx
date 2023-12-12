@@ -11,6 +11,7 @@ export default function Home() {
   const [cookies, setCookie, removeCookie] = useCookies(['user'])
   const router = useRouter()
 
+  const [clientName, setClientName] = useState("")
   const [Instruction, setInstruction] = useState("")
   const [files, setFiles] = useState<UFile[]>([])
   const [instrEditable, setInstrEditable] = useState(false)
@@ -21,6 +22,7 @@ export default function Home() {
     if (!userInfo) {
       router.push('/login', { scroll: false })
     }
+    setClientName(cookies.user?.name)
     getInstructions(cookies.user?.name).then((value) => {
       if (typeof value === "string") {
         setInstruction(value)
@@ -35,9 +37,9 @@ export default function Home() {
     })
   }, [])
 
-  const deleteFile = (id: number) => async () => {
+  const deleteFile = (clientName: string, id: number) => async () => {
     try {
-      const success = await removeFile(cookies.user?.name, id)
+      const success = await removeFile(clientName, id)
       if (success) {
         setFiles((value) => {
           const tmp = value.filter((v) => v.id !== id)
@@ -69,6 +71,10 @@ export default function Home() {
     }
     const file = event.target.files?.item(0)
     if (file) {
+      console.log(file.size)
+      // if (file.size >= ) {
+      //   return
+      // }
       switch (file.type) {
         case "application/pdf":
         case "text/plain":
@@ -107,7 +113,7 @@ export default function Home() {
       <main className="flex flex-col px-10 pt-10">
         <div className="mb-7">
           <h1 className="float-left text-3xl">
-            {cookies.user?.name}
+            {clientName}
           </h1>
           <button
             type="button"
@@ -123,7 +129,7 @@ export default function Home() {
             type="button"
             className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right"
             onClick={
-              instrEditable ? updateInstr(cookies.user?.name, Instruction) : () => { setInstrEditable(true) }
+              instrEditable ? updateInstr(clientName, Instruction) : () => { setInstrEditable(true) }
             }
           >
             {instrEditable ? "Save" : "Edit"}
@@ -150,7 +156,7 @@ export default function Home() {
               type="file"
               className="absolute opacity-0 top-0 left-0 w-0 h-0"
               accept=".docx, .txt, .pdf"
-              onChange={fileUpload(cookies.user?.name)}
+              onChange={fileUpload(clientName)}
               disabled={uploading}
             />
           </div>
@@ -180,7 +186,7 @@ export default function Home() {
                           <button
                             type="button"
                             className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-2 py-1.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right"
-                            onClick={deleteFile(value.id)}
+                            onClick={deleteFile(clientName, value.id)}
                           >
                             remove
                           </button>
