@@ -1,4 +1,4 @@
-import { getAllFiles, getInstructions, removeFile, updateInstructions, uploadFile } from "@/apis";
+import { getAllFiles, getInstructions, getModelName, getModels, removeFile, updateInstructions, updateModel, uploadFile } from "@/apis";
 import { UFile } from "@/types/file";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,9 @@ export default function Home() {
   const [files, setFiles] = useState<UFile[]>([])
   const [instrEditable, setInstrEditable] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [models, setModels] = useState<string[]>([])
+  const [model, setModel] = useState("")
+  const [isModelEditable, setIsModelEditable] = useState(false)
 
   useEffect(() => {
     const userInfo = cookies.user
@@ -32,6 +35,16 @@ export default function Home() {
     })
     getAllFiles(cookies.user?.name).then((value) => {
       setFiles(value)
+    }).catch((reason) => {
+      console.error(reason)
+    })
+    getModels().then((models) => {
+      setModels(models)
+    }).catch((reason) => {
+      console.error(reason)
+    })
+    getModelName(cookies.user?.name).then((model) => {
+      setModel(model)
     }).catch((reason) => {
       console.error(reason)
     })
@@ -58,6 +71,17 @@ export default function Home() {
       const success = await updateInstructions(clientName, instr)
       if (success) {
         setInstrEditable(false)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const updateModelName = (clientName: string, modelName: string) => async () => {
+    try {
+      const success = await updateModel(clientName, modelName)
+      if (success) {
+        setIsModelEditable(false)
       }
     } catch (error) {
       console.error(error)
@@ -117,17 +141,51 @@ export default function Home() {
           </h1>
           <button
             type="button"
-            className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right"
+            className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5  mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right"
             onClick={logout}
           >
             Logout
           </button>
         </div>
         <div>
+          <label htmlFor="large-input" className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Language models</label>
+          <button
+            type="button"
+            className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5  mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right "
+            onClick={
+              isModelEditable ? updateModelName(clientName, model) : () => { setIsModelEditable(true) }
+            }
+          >
+            {isModelEditable ? "Save" : "Edit"}
+          </button>
+        </div>
+        <div className="mb-7">
+          {isModelEditable ? (
+            <select
+              id="models"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              onChange={(e) => { setModel(e.target.value)}}
+            >
+              {models.map((value, idx) => {
+                return (
+                  <option key={idx} value={value} className="py-10" selected={value===model}>{value}</option>
+                )
+              })}
+            </select>
+          ) : (
+              <p
+                id="models"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              >
+                {model}
+              </p>
+          )}
+        </div>
+        <div>
           <label htmlFor="large-input" className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Instruction</label>
           <button
             type="button"
-            className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right"
+            className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5  mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right"
             onClick={
               instrEditable ? updateInstr(clientName, Instruction) : () => { setInstrEditable(true) }
             }
@@ -147,7 +205,7 @@ export default function Home() {
         <div className="">
           <label htmlFor="large-input" className="mb-2 text-lg font-medium text-gray-900 dark:text-white">{`Files (${files.length}/${MAX_FILES})`}</label>
           <div className="relative inline-block float-right">
-            <label htmlFor="file" className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 cursor-pointer">
+            <label htmlFor="file" className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5  mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 cursor-pointer">
               { uploading ? "Uploading..." : "Upload File" }
             </label>
             <input
@@ -185,7 +243,7 @@ export default function Home() {
                         <td className="whitespace-nowrap px-6 py-4">
                           <button
                             type="button"
-                            className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-2 py-1.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right"
+                            className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-2 py-1.5  mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 float-right"
                             onClick={deleteFile(clientName, value.id)}
                           >
                             remove

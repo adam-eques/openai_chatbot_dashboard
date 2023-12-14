@@ -7,7 +7,7 @@ const apiInstance = axios.create({
 
 export const getClient = (clientName: string) => {
   return apiInstance.get('/admin/client', {
-    data: {
+    params: {
       client: clientName
     }
   }).then((res) => {
@@ -20,7 +20,7 @@ export const getClient = (clientName: string) => {
 
 export const getInstructions = (clientName: string) => {
   return apiInstance.get('/admin/instruction', {
-    data: {
+    params: {
       client: clientName
     }
   }).then((res) => {
@@ -46,7 +46,7 @@ export const updateInstructions = (clientName: string, instruction: string) => {
 
 export const getAllFiles = (clientName: string) => {
   return apiInstance.get('/admin/file/all', {
-    data: {
+    params: {
       client: clientName
     }
   }).then((res) => {
@@ -132,5 +132,40 @@ export const uploadFile = (clientName: string, file: File) => {
       }
     }
     return tmp
+  })
+}
+
+export const getModels = () => {
+  return apiInstance.get('/model/all', {
+  }).then((res) => {
+    if (res.status === 200) {
+      return res.data.models
+    }
+    return []
+  })
+}
+
+export const getModelName = (clientName: string) => {
+  return apiInstance.get('/admin/model', {
+    params: {
+      client: clientName
+    }
+  }).then((res) => {
+    if (res.status === 200) {
+      return res.data.model
+    }
+    return undefined
+  })
+}
+
+export const updateModel = (clientName: string, modelName: string) => {
+  return apiInstance.post('/admin/model', {
+    client: clientName,
+    model: modelName,
+  }).then((res) => {
+    if (res.status === 200) {
+      return true
+    }
+    return false
   })
 }
