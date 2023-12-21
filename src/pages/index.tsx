@@ -95,14 +95,17 @@ export default function Home() {
     }
     const file = event.target.files?.item(0)
     if (file) {
-      console.log(file.size)
+      console.log(file.size, file.type)
       // if (file.size >= ) {
       //   return
       // }
       switch (file.type) {
-        case "application/pdf":
-        case "text/plain":
-        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        case "application/pdf": // pdf
+        case "text/plain": // txt
+        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": // Word - docx
+        case "application/vnd.openxmlformats-officedocument.presentationml.presentation": // PPT - pptx
+        case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": // xlsx
+        case "text/csv": // csv
           setUploading(true)
           uploadFile(clientName, file).then((res) => {
             if (res.success) {
@@ -213,7 +216,7 @@ export default function Home() {
               name="file"
               type="file"
               className="absolute opacity-0 top-0 left-0 w-0 h-0"
-              accept=".docx, .txt, .pdf"
+              accept=".csv, .docx, .txt, .pdf, .pptx, .xlsx"
               onChange={fileUpload(clientName)}
               disabled={uploading}
             />
