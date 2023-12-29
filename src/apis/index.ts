@@ -169,3 +169,21 @@ export const updateModel = (clientName: string, modelName: string) => {
     return false
   })
 }
+
+export const getMessages = (threadId: string, { limit, order, after, before }: {
+    limit?: number,
+    order?: "asc" | "desc",
+    after?: string,
+    before?: string
+}) => {
+  return apiInstance.get(`/threads/${threadId}/messages`, {
+    params: {
+      limit, order, after, before
+    }
+  }).then((res) => {
+    if (res.status === 200) {
+      return res.data.messages
+    }
+    return []
+  })
+}
